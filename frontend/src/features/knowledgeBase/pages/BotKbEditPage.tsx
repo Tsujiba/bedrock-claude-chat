@@ -34,8 +34,12 @@ import { AvailableTools } from '../../../features/agent/components/AvailableTool
 import {
   DEFAULT_CHUNKING_MAX_TOKENS,
   DEFAULT_CHUNKING_OVERLAP_PERCENTAGE,
+  DEFAULT_BUFFER_SIZE,
+  DEFAULT_BREAKPOINT_PERCENTILE_THRESHOLD,
   EDGE_CHUNKING_MAX_TOKENS,
   EDGE_CHUNKING_OVERLAP_PERCENTAGE,
+  EDGE_CHUNKING_BUFFER_SIZE,
+  EDGE_BREAKPOINT_PERCENTILE_THRESHOLD,
   EDGE_SEARCH_PARAMS,
   OPENSEARCH_ANALYZER,
   DEFAULT_SEARCH_CONFIG,
@@ -152,6 +156,11 @@ const BotKbEditPage: React.FC = () => {
       description: t('knowledgeBaseSettings.chunkingStrategy.fixed_size.hint'),
     },
     {
+      label: t('knowledgeBaseSettings.chunkingStrategy.semantic.label'),
+      value: 'semantic',
+      description: t('knowledgeBaseSettings.chunkingStrategy.semantic.hint'),
+    },
+    {
       label: t('knowledgeBaseSettings.chunkingStrategy.none.label'),
       value: 'none',
       description: t('knowledgeBaseSettings.chunkingStrategy.none.hint'),
@@ -164,6 +173,12 @@ const BotKbEditPage: React.FC = () => {
 
   const [chunkingOverlapPercentage, setChunkingOverlapPercentage] =
     useState<number>(DEFAULT_CHUNKING_OVERLAP_PERCENTAGE);
+  
+  const [chunkingBufferSize, setBufferSize] =
+    useState<number>(DEFAULT_BUFFER_SIZE);
+
+  const [chunkingBreakpointPercentileThreshold, setBreakpointPercentileThreshold] =
+    useState<number>(DEFAULT_BREAKPOINT_PERCENTILE_THRESHOLD);
 
   const [analyzer, setAnalyzer] = useState<string>(
     DEFAULT_OPENSEARCH_ANALYZER[i18n.language] ?? 'none'
@@ -711,9 +726,13 @@ const BotKbEditPage: React.FC = () => {
         knowledgeBaseId,
         embeddingsModel,
         chunkingStrategy,
-        maxTokens: chunkingStrategy == 'fixed_size' ? chunkingMaxTokens : null,
+        maxTokens: (chunkingStrategy == 'fixed_size' || chunkingStrategy == 'semantic')  ? chunkingMaxTokens : null,
         overlapPercentage:
           chunkingStrategy == 'fixed_size' ? chunkingOverlapPercentage : null,
+        bufferSize:
+          chunkingStrategy == 'semantic' ? chunkingBufferSize : null,
+        breakpointPercentileThreshold:
+          chunkingStrategy == 'semantic' ? chunkingBreakpointPercentileThreshold : null,
         openSearch: openSearchParams,
         searchParams: searchParams,
       },
@@ -819,6 +838,10 @@ const BotKbEditPage: React.FC = () => {
             chunkingStrategy == 'fixed_size' ? chunkingMaxTokens : null,
           overlapPercentage:
             chunkingStrategy == 'fixed_size' ? chunkingOverlapPercentage : null,
+          bufferSize:
+            chunkingStrategy == 'semantic' ? chunkingBufferSize : null,
+          breakpointPercentileThreshold:
+            chunkingStrategy == 'semantic' ? chunkingBreakpointPercentileThreshold : null,
           openSearch: openSearchParams,
           searchParams: searchParams,
         },
@@ -1244,6 +1267,95 @@ const BotKbEditPage: React.FC = () => {
                         disabled={!isNewBot}
                         errorMessage={
                           errorMessages['chunkingOverlapPercentage']
+                        }
+                      />
+                    </div>
+                  </>
+                )}
+                 {chunkingStrategy === 'semantic' && (
+                  <>
+                    <div className="mx-4 mt-2">
+                      <Slider
+                        value={chunkingMaxTokens}
+                        hint={t('knowledgeBaseSettings.chunkingMaxTokens.hint')}
+                        label={
+                          <div className="flex items-center gap-1">
+                            {t('knowledgeBaseSettings.chunkingMaxTokens.label')}
+                            <Help
+                              direction={TooltipDirection.RIGHT}
+                              message={t('embeddingSettings.help.chunkSize')}
+                            />
+                          </div>
+                        }
+                        range={{
+                          min: EDGE_CHUNKING_MAX_TOKENS.MIN,
+                          max: EDGE_CHUNKING_MAX_TOKENS.MAX[embeddingsModel],
+                          step: EDGE_CHUNKING_MAX_TOKENS.STEP,
+                        }}
+                        onChange={setChunkingMaxTokens}
+                        disabled={!isNewBot}
+                        errorMessage={errorMessages['chunkingMaxTokens']}
+                      />
+                    </div>
+                    <div className="mx-4 mt-2">
+                      <Slider
+                        value={chunkingBufferSize}
+                        hint={t(
+                          'knowledgeBaseSettings.bufferSize.hint'
+                        )}
+                        label={
+                          <div className="flex items-center gap-1">
+                            {t(
+                              'knowledgeBaseSettings.bufferSize.label'
+                            )}
+                            <Help
+                              direction={TooltipDirection.RIGHT}
+                              message={t('embeddingSettings.help.bufferSize')}
+                            />
+                          </div>
+                        }
+                        range={{
+                          min: EDGE_CHUNKING_BUFFER_SIZE.MIN,
+                          max: EDGE_CHUNKING_BUFFER_SIZE.MAX,
+                          step: EDGE_CHUNKING_BUFFER_SIZE.STEP,
+                        }}
+                        onChange={(bufferSize) =>
+                          setBufferSize(bufferSize)
+                        }
+                        disabled={!isNewBot}
+                        errorMessage={
+                          errorMessages['bufferSize']
+                        }
+                      />
+                    </div>
+                    <div className="mx-4 mt-2">
+                      <Slider
+                        value={chunkingBreakpointPercentileThreshold}
+                        hint={t(
+                          'knowledgeBaseSettings.breakpointPercentileThreshold.hint'
+                        )}
+                        label={
+                          <div className="flex items-center gap-1">
+                            {t(
+                              'knowledgeBaseSettings.breakpointPercentileThreshold.label'
+                            )}
+                            <Help
+                              direction={TooltipDirection.RIGHT}
+                              message={t('embeddingSettings.help.breakpointPercentileThreshold')}
+                            />
+                          </div>
+                        }
+                        range={{
+                          min: EDGE_BREAKPOINT_PERCENTILE_THRESHOLD.MIN,
+                          max: EDGE_BREAKPOINT_PERCENTILE_THRESHOLD.MAX,
+                          step: EDGE_BREAKPOINT_PERCENTILE_THRESHOLD.STEP,
+                        }}
+                        onChange={(breakpointPercentileThreshold) =>
+                          setBreakpointPercentileThreshold(breakpointPercentileThreshold)
+                        }
+                        disabled={!isNewBot}
+                        errorMessage={
+                          errorMessages['breakpointPercentileThreshold']
                         }
                       />
                     </div>

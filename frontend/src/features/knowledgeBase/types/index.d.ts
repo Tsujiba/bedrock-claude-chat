@@ -5,13 +5,15 @@ export type BedrockKnowledgeBase = {
   chunkingStrategy: ChunkingStrategy;
   maxTokens: number | null; // null when chunkingStrategy isn't 'fixed_size'
   overlapPercentage: number | null; // null when chunkingStrategy isn't 'fixed_size'
+  bufferSize: number | null; // null when chunkingStrategy isn't 'semantic'
+  breakpointPercentileThreshold: number | null; // null when chunkingStrategy isn't 'semantic'
   openSearch: OpenSearchParams;
   searchParams: SearchParams;
 };
 
 export type EmbeddingsModel = 'titan_v2' | 'cohere_multilingual_v3';
 
-export type ChunkingStrategy = 'default' | 'fixed_size' | 'none';
+export type ChunkingStrategy = 'default' | 'fixed_size' | 'semantic' | 'none';
 
 export type OpenSearchParams = {
   analyzer: {

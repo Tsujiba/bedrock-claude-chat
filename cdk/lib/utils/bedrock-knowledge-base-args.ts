@@ -1,13 +1,26 @@
 import {
   BedrockFoundationModel,
-  ChunkingStrategy,
 } from "@cdklabs/generative-ai-cdk-constructs/lib/cdk-lib/bedrock";
+import {
+  ChunkingStrategy,
+} from "@cdklabs/generative-ai-cdk-constructs/lib/cdk-lib/bedrock/data-sources/chunking";
 import { Analyzer } from "@cdklabs/generative-ai-cdk-constructs/lib/cdk-lib/opensearch-vectorindex";
 import {
   CharacterFilterType,
   TokenFilterType,
   TokenizerType,
 } from "@cdklabs/generative-ai-cdk-constructs/lib/cdk-lib/opensearchserverless";
+
+interface FixedSizeOptions {
+  readonly maxTokens: number;
+  readonly overlapPercentage: number;
+}
+
+interface SemanticOptions {
+  readonly maxTokens: number;
+  readonly bufferSize: number;
+  readonly breakpointPercentileThreshold: number;
+}
 
 export const getEmbeddingModel = (
   embeddingsModel: string
@@ -23,13 +36,29 @@ export const getEmbeddingModel = (
 };
 
 export const getChunkingStrategy = (
-  chunkingStrategy: string
+  chunkingStrategy: string,
+  options?: Partial<FixedSizeOptions & SemanticOptions>
 ): ChunkingStrategy => {
   switch (chunkingStrategy) {
     case "default":
       return ChunkingStrategy.DEFAULT;
     case "fixed_size":
+      if (options?.maxTokens && options?.overlapPercentage) {
+        return ChunkingStrategy.fixedSize({
+          maxTokens: options.maxTokens,
+          overlapPercentage: options.overlapPercentage
+        });
+      }
       return ChunkingStrategy.FIXED_SIZE;
+    case "semantic":
+      if (options?.maxTokens && options?.bufferSize && options?.breakpointPercentileThreshold) {
+        return ChunkingStrategy.semantic({
+          maxTokens: options.maxTokens,
+          bufferSize: options.bufferSize,
+          breakpointPercentileThreshold: options.breakpointPercentileThreshold
+        });
+      }
+      return ChunkingStrategy.SEMANTIC;
     case "none":
       return ChunkingStrategy.NONE;
     default:

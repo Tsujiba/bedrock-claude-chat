@@ -31,5 +31,7 @@ class BedrockKnowledgeBaseModel(BaseModel):
     search_params: SearchParamsModel
     max_tokens: int | None = None
     overlap_percentage: int | None = None
+    buffer_Size: int | None = None
+    breakpoint_Percentile_Threshold: int | None = None
     knowledge_base_id: str | None = None
     data_source_ids: list[str] | None = None

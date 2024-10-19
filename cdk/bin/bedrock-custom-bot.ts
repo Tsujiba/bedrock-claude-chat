@@ -49,7 +49,7 @@ console.log("guardrails: ", guardrails);
 console.log("existingS3Urls: ", existingS3Urls);
 
 const embeddingsModel = getEmbeddingModel(knowledgeBase.embeddings_model.S);
-const chunkingStrategy = getChunkingStrategy(knowledgeBase.chunking_strategy.S);
+
 const maxTokens: number | undefined = knowledgeBase.max_tokens
   ? Number(knowledgeBase.max_tokens.N)
   : undefined;
@@ -62,7 +62,12 @@ const analyzer = knowledgeBase.open_search.M.analyzer.M
 const overlapPercentage: number | undefined = knowledgeBase.overlap_percentage
   ? Number(knowledgeBase.overlap_percentage.N)
   : undefined;
-
+const bufferSize: number | undefined = knowledgeBase.buffer_Size
+  ? Number(knowledgeBase.buffer_Size.N)
+  : undefined;
+const breakpointPercentileThreshold: number | undefined = knowledgeBase.breakpoint_Percentile_Threshold
+  ? Number(knowledgeBase.breakpoint_Percentile_Threshold.N)
+  : undefined;
 const is_guardrail_enabled: boolean | undefined =
   guardrails.is_guardrail_enabled
     ? Boolean(guardrails.is_guardrail_enabled.BOOL)
@@ -94,6 +99,15 @@ const guardrailArn: number | undefined = guardrails.guardrail_arn
 const guardrailVersion: number | undefined = guardrails.guardrail_version
   ? Number(guardrails.guardrail_version.N)
   : undefined;
+const chunkingStrategy = getChunkingStrategy(
+  knowledgeBase.chunking_strategy.S, 
+  {
+    maxTokens,
+    overlapPercentage,
+    bufferSize,
+    breakpointPercentileThreshold,
+  }
+);
 
 console.log("embeddingsModel: ", embeddingsModel);
 console.log("chunkingStrategy: ", chunkingStrategy);
