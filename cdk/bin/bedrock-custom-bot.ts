@@ -62,11 +62,20 @@ const analyzer = knowledgeBase.open_search.M.analyzer.M
 const overlapPercentage: number | undefined = knowledgeBase.overlap_percentage
   ? Number(knowledgeBase.overlap_percentage.N)
   : undefined;
+const overlapTokens: number | undefined = knowledgeBase.overlap_tokens
+  ? Number(knowledgeBase.overlap_tokens.N)
+  : undefined;
+const maxParentTokenSize: number | undefined = knowledgeBase.max_parent_token_size
+  ? Number(knowledgeBase.max_parent_token_size.N)
+  : undefined;
+const maxChildTokenSize: number | undefined = knowledgeBase.max_child_token_size
+  ? Number(knowledgeBase.max_child_token_size.N)
+  : undefined;
 const bufferSize: number | undefined = knowledgeBase.buffer_Size
-  ? Number(knowledgeBase.buffer_Size.N)
+  ? Number(knowledgeBase.buffer_size.N)
   : undefined;
 const breakpointPercentileThreshold: number | undefined = knowledgeBase.breakpoint_Percentile_Threshold
-  ? Number(knowledgeBase.breakpoint_Percentile_Threshold.N)
+  ? Number(knowledgeBase.breakpoint_percentile_threshold.N)
   : undefined;
 const is_guardrail_enabled: boolean | undefined =
   guardrails.is_guardrail_enabled
@@ -100,10 +109,14 @@ const guardrailVersion: number | undefined = guardrails.guardrail_version
   ? Number(guardrails.guardrail_version.N)
   : undefined;
 const chunkingStrategy = getChunkingStrategy(
-  knowledgeBase.chunking_strategy.S, 
+  knowledgeBase.chunking_strategy.S,
+  knowledgeBase.embeddings_model.S,
   {
     maxTokens,
     overlapPercentage,
+    overlapTokens,
+    maxParentTokenSize,
+    maxChildTokenSize,
     bufferSize,
     breakpointPercentileThreshold,
   }

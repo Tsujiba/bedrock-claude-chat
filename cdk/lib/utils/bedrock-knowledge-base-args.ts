@@ -2,6 +2,7 @@ import {
   BedrockFoundationModel,
 } from "@cdklabs/generative-ai-cdk-constructs/lib/cdk-lib/bedrock";
 import {
+  HierarchicalChunkingProps,
   ChunkingStrategy,
 } from "@cdklabs/generative-ai-cdk-constructs/lib/cdk-lib/bedrock/data-sources/chunking";
 import { Analyzer } from "@cdklabs/generative-ai-cdk-constructs/lib/cdk-lib/opensearch-vectorindex";
@@ -37,7 +38,8 @@ export const getEmbeddingModel = (
 
 export const getChunkingStrategy = (
   chunkingStrategy: string,
-  options?: Partial<FixedSizeOptions & SemanticOptions>
+  embeddingsModel: string,
+  options?: Partial<FixedSizeOptions & HierarchicalChunkingProps & SemanticOptions>
 ): ChunkingStrategy => {
   switch (chunkingStrategy) {
     case "default":
@@ -50,6 +52,15 @@ export const getChunkingStrategy = (
         });
       }
       return ChunkingStrategy.FIXED_SIZE;
+    case "hierarchical":
+        if (options?.overlapTokens && options?.maxParentTokenSize && options?.maxChildTokenSize) {
+          return ChunkingStrategy.hierarchical({
+            overlapTokens: options.overlapTokens,
+            maxParentTokenSize: options.maxParentTokenSize,
+            maxChildTokenSize: options.maxChildTokenSize
+          });
+        } 
+        return embeddingsModel === 'titan_v2' ? ChunkingStrategy.HIERARCHICAL_TITAN : ChunkingStrategy.HIERARCHICAL_COHERE;
     case "semantic":
       if (options?.maxTokens && options?.bufferSize && options?.breakpointPercentileThreshold) {
         return ChunkingStrategy.semantic({

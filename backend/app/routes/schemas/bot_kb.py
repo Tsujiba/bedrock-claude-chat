@@ -4,7 +4,7 @@ from app.routes.schemas.base import BaseSchema
 from pydantic import Field
 
 # Ref: https://docs.aws.amazon.com/bedrock/latest/APIReference/API_agent_ChunkingConfiguration.html
-type_kb_chunking_strategy = Literal["default", "fixed_size", "semantic", "none"]
+type_kb_chunking_strategy = Literal["default", "fixed_size", "hierarchical" , "semantic", "none"]
 type_kb_embeddings_model = Literal["titan_v2", "cohere_multilingual_v3"]
 type_kb_search_type = Literal["hybrid", "semantic"]
 
@@ -45,8 +45,11 @@ class BedrockKnowledgeBaseInput(BaseSchema):
     search_params: SearchParams
     max_tokens: int | None = None
     overlap_percentage: int | None = None
-    buffer_Size: int | None = None
-    breakpoint_Percentile_Threshold: int | None = None
+    overlap_tokens: int | None = None
+    max_parent_token_size: int | None = None
+    max_child_token_size: int | None = None
+    buffer_size: int | None = None
+    breakpoint_percentile_threshold: int | None = None
     knowledge_base_id: str | None = None
 
 
@@ -57,7 +60,10 @@ class BedrockKnowledgeBaseOutput(BaseSchema):
     search_params: SearchParams
     max_tokens: int | None = None
     overlap_percentage: int | None = None
-    buffer_Size: int | None = None
-    breakpoint_Percentile_Threshold: int | None = None
+    overlap_tokens: int | None = None
+    max_parent_token_size: int | None = None
+    max_child_token_size: int | None = None
+    buffer_size: int | None = None
+    breakpoint_percentile_threshold: int | None = None
     knowledge_base_id: str | None = None
     data_source_ids: list[str] | None = None

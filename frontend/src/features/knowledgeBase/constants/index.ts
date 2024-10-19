@@ -47,6 +47,9 @@ export const DEFAULT_BEDROCK_KNOWLEDGEBASE: BedrockKnowledgeBase = {
   chunkingStrategy: 'default',
   maxTokens: null,
   overlapPercentage: null,
+  overlapTokens: null,
+  maxParentTokenSize: null,
+  maxChildTokenSize: null,
   bufferSize: null,
   breakpointPercentileThreshold: null,
   searchParams: {
@@ -57,6 +60,9 @@ export const DEFAULT_BEDROCK_KNOWLEDGEBASE: BedrockKnowledgeBase = {
 
 export const DEFAULT_CHUNKING_MAX_TOKENS = 300;
 export const DEFAULT_CHUNKING_OVERLAP_PERCENTAGE = 20;
+export const DEFAULT_OVERLAP_TOKENS = 60;
+export const DEFAULT_MAX_PARENT_TOKEN_SIZE = 1500;
+export const DEFAULT_MAX_CHILD_TOKEN_SIZE = 300;
 export const DEFAULT_BUFFER_SIZE = 0;
 export const DEFAULT_BREAKPOINT_PERCENTILE_THRESHOLD = 95;
 
@@ -78,6 +84,23 @@ export const EDGE_CHUNKING_OVERLAP_PERCENTAGE = {
 export const EDGE_CHUNKING_BUFFER_SIZE = {
   MAX: 1,
   MIN: 0,
+  STEP: 1,
+};
+
+export const EDGE_OVERLAP_TOKENS = {
+  MIN: 1,
+  STEP: 1,
+};
+
+export const EDGE_MAX_PARENT_TOKEN_SIZE = {
+  MAX: 8192,
+  MIN: 1,
+  STEP: 1,
+};
+
+export const EDGE_MAX_CHILD_TOKEN_SIZE = {
+  MAX: 8192,
+  MIN: 1,
   STEP: 1,
 };
 

@@ -34,10 +34,16 @@ import { AvailableTools } from '../../../features/agent/components/AvailableTool
 import {
   DEFAULT_CHUNKING_MAX_TOKENS,
   DEFAULT_CHUNKING_OVERLAP_PERCENTAGE,
+  DEFAULT_OVERLAP_TOKENS,
+  DEFAULT_MAX_PARENT_TOKEN_SIZE,
+  DEFAULT_MAX_CHILD_TOKEN_SIZE,
   DEFAULT_BUFFER_SIZE,
   DEFAULT_BREAKPOINT_PERCENTILE_THRESHOLD,
   EDGE_CHUNKING_MAX_TOKENS,
   EDGE_CHUNKING_OVERLAP_PERCENTAGE,
+  EDGE_OVERLAP_TOKENS,
+  EDGE_MAX_PARENT_TOKEN_SIZE,
+  EDGE_MAX_CHILD_TOKEN_SIZE,
   EDGE_CHUNKING_BUFFER_SIZE,
   EDGE_BREAKPOINT_PERCENTILE_THRESHOLD,
   EDGE_SEARCH_PARAMS,
@@ -156,6 +162,11 @@ const BotKbEditPage: React.FC = () => {
       description: t('knowledgeBaseSettings.chunkingStrategy.fixed_size.hint'),
     },
     {
+      label: t('knowledgeBaseSettings.chunkingStrategy.hierarchical.label'),
+      value: 'hierarchical',
+      description: t('knowledgeBaseSettings.chunkingStrategy.hierarchical.hint'),
+    },
+    {
       label: t('knowledgeBaseSettings.chunkingStrategy.semantic.label'),
       value: 'semantic',
       description: t('knowledgeBaseSettings.chunkingStrategy.semantic.hint'),
@@ -173,6 +184,15 @@ const BotKbEditPage: React.FC = () => {
 
   const [chunkingOverlapPercentage, setChunkingOverlapPercentage] =
     useState<number>(DEFAULT_CHUNKING_OVERLAP_PERCENTAGE);
+  
+  const [chunkingOverlapTokens, setChunkingOverlapTokens] =
+    useState<number>(DEFAULT_OVERLAP_TOKENS);
+  
+  const [chunkingMaxParentTokenSize, setChunkingMaxParentTokenSize] =
+    useState<number>(DEFAULT_MAX_PARENT_TOKEN_SIZE);
+  
+  const [chunkingMaxChildTokenSize, setChunkingMaxChildTokenSize] =
+    useState<number>(DEFAULT_MAX_CHILD_TOKEN_SIZE);
   
   const [chunkingBufferSize, setBufferSize] =
     useState<number>(DEFAULT_BUFFER_SIZE);
@@ -729,6 +749,12 @@ const BotKbEditPage: React.FC = () => {
         maxTokens: (chunkingStrategy == 'fixed_size' || chunkingStrategy == 'semantic')  ? chunkingMaxTokens : null,
         overlapPercentage:
           chunkingStrategy == 'fixed_size' ? chunkingOverlapPercentage : null,
+        overlapTokens:
+          chunkingStrategy == 'hierarchical' ? chunkingOverlapTokens : null,
+        maxParentTokenSize:
+          chunkingStrategy == 'hierarchical' ? chunkingMaxParentTokenSize : null,
+        maxChildTokenSize:
+          chunkingStrategy == 'hierarchical' ? chunkingMaxChildTokenSize : null,
         bufferSize:
           chunkingStrategy == 'semantic' ? chunkingBufferSize : null,
         breakpointPercentileThreshold:
@@ -834,10 +860,15 @@ const BotKbEditPage: React.FC = () => {
           knowledgeBaseId,
           embeddingsModel,
           chunkingStrategy,
-          maxTokens:
-            chunkingStrategy == 'fixed_size' ? chunkingMaxTokens : null,
+          maxTokens: (chunkingStrategy == 'fixed_size' || chunkingStrategy == 'semantic')  ? chunkingMaxTokens : null,
           overlapPercentage:
             chunkingStrategy == 'fixed_size' ? chunkingOverlapPercentage : null,
+          overlapTokens:
+            chunkingStrategy == 'hierarchical' ? chunkingOverlapTokens : null,
+          maxParentTokenSize:
+            chunkingStrategy == 'hierarchical' ? chunkingMaxParentTokenSize : null,
+          maxChildTokenSize:
+            chunkingStrategy == 'hierarchical' ? chunkingMaxChildTokenSize : null,
           bufferSize:
             chunkingStrategy == 'semantic' ? chunkingBufferSize : null,
           breakpointPercentileThreshold:
@@ -1267,6 +1298,95 @@ const BotKbEditPage: React.FC = () => {
                         disabled={!isNewBot}
                         errorMessage={
                           errorMessages['chunkingOverlapPercentage']
+                        }
+                      />
+                    </div>
+                  </>
+                )}
+                 {chunkingStrategy === 'hierarchical' && (
+                  <>
+                    <div className="mx-4 mt-2">
+                      <Slider
+                        value={chunkingOverlapTokens}
+                        hint={t('knowledgeBaseSettings.overlapTokens.hint')}
+                        label={
+                          <div className="flex items-center gap-1">
+                            {t('knowledgeBaseSettings.overlapTokens.label')}
+                            <Help
+                              direction={TooltipDirection.RIGHT}
+                              message={t('embeddingSettings.help.overlapTokens')}
+                            />
+                          </div>
+                        }
+                        range={{
+                          min: EDGE_OVERLAP_TOKENS.MIN,
+                          max: EDGE_CHUNKING_MAX_TOKENS.MAX[embeddingsModel],
+                          step: EDGE_OVERLAP_TOKENS.STEP,
+                        }}
+                        onChange={setChunkingOverlapTokens}
+                        disabled={!isNewBot}
+                        errorMessage={errorMessages['chunkingOverlapTokens']}
+                      />
+                    </div>
+                    <div className="mx-4 mt-2">
+                      <Slider
+                        value={chunkingMaxParentTokenSize}
+                        hint={t(
+                          'knowledgeBaseSettings.maxParentTokenSize.hint'
+                        )}
+                        label={
+                          <div className="flex items-center gap-1">
+                            {t(
+                              'knowledgeBaseSettings.maxParentTokenSize.label'
+                            )}
+                            <Help
+                              direction={TooltipDirection.RIGHT}
+                              message={t('embeddingSettings.help.maxParentTokenSize')}
+                            />
+                          </div>
+                        }
+                        range={{
+                          min: EDGE_MAX_PARENT_TOKEN_SIZE.MIN,
+                          max: EDGE_MAX_PARENT_TOKEN_SIZE.MAX,
+                          step: EDGE_MAX_PARENT_TOKEN_SIZE.STEP,
+                        }}
+                        onChange={(maxParentTokenSize) =>
+                          setChunkingMaxParentTokenSize(maxParentTokenSize)
+                        }
+                        disabled={!isNewBot}
+                        errorMessage={
+                          errorMessages['maxParentTokenSize']
+                        }
+                      />
+                    </div>
+                    <div className="mx-4 mt-2">
+                      <Slider
+                        value={chunkingMaxChildTokenSize}
+                        hint={t(
+                          'knowledgeBaseSettings.maxChildTokenSize.hint'
+                        )}
+                        label={
+                          <div className="flex items-center gap-1">
+                            {t(
+                              'knowledgeBaseSettings.maxChildTokenSize.label'
+                            )}
+                            <Help
+                              direction={TooltipDirection.RIGHT}
+                              message={t('embeddingSettings.help.maxChildTokenSize')}
+                            />
+                          </div>
+                        }
+                        range={{
+                          min: EDGE_MAX_CHILD_TOKEN_SIZE.MIN,
+                          max: EDGE_MAX_CHILD_TOKEN_SIZE.MAX,
+                          step: EDGE_MAX_CHILD_TOKEN_SIZE.STEP,
+                        }}
+                        onChange={(maxChildTokenSize) =>
+                          setChunkingMaxChildTokenSize(maxChildTokenSize)
+                        }
+                        disabled={!isNewBot}
+                        errorMessage={
+                          errorMessages['maxChildTokenSize']
                         }
                       />
                     </div>
