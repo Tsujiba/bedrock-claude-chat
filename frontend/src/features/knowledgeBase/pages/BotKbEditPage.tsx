@@ -1625,7 +1625,7 @@ const BotKbEditPage: React.FC = () => {
                         }
                         disabled={!isNewBot}
                         errorMessage={
-                          errorMessages['breakpointPercentileThreshold']
+                          errorMessages['chunkingBreakpointPercentileThreshold']
                         }
                       />
                     </div>
