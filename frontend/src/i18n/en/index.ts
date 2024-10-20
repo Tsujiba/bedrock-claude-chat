@@ -644,6 +644,9 @@ How would you categorize this email?`,
       chunkOverlapLessThanChunkSize: {
         message: 'Chunk overlap must be set to less than Chunk size',
       },
+      parentTokenRange: {
+        message: 'Parent token size should be larger than child token size',
+      },
       quickStarter: {
         message: 'Please input both Title and Conversation Example.',
       },

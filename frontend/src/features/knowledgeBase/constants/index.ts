@@ -81,26 +81,32 @@ export const EDGE_CHUNKING_OVERLAP_PERCENTAGE = {
   STEP: 1,
 };
 
-export const EDGE_CHUNKING_BUFFER_SIZE = {
-  MAX: 1,
-  MIN: 0,
-  STEP: 1,
-};
-
 export const EDGE_OVERLAP_TOKENS = {
   MIN: 1,
   STEP: 1,
 };
 
 export const EDGE_MAX_PARENT_TOKEN_SIZE = {
-  MAX: 8192,
+  MAX: {
+    titan_v2: 8192,
+    cohere_multilingual_v3: 512,
+  },
   MIN: 1,
   STEP: 1,
 };
 
 export const EDGE_MAX_CHILD_TOKEN_SIZE = {
-  MAX: 8192,
+  MAX: {
+    titan_v2: 8192,
+    cohere_multilingual_v3: 512,
+  },
   MIN: 1,
+  STEP: 1,
+};
+
+export const EDGE_CHUNKING_BUFFER_SIZE = {
+  MAX: 1,
+  MIN: 0,
   STEP: 1,
 };
 

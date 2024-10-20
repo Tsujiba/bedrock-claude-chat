@@ -641,6 +641,9 @@ const translation = {
         message:
           'チャンクオーバーラップはチャンクサイズより小さく設定する必要があります',
       },
+      parentTokenRange: {
+        message: '親トークンのサイズは子トークンのサイズより大きくする必要があります',
+      },
       quickStarter: {
         message: 'タイトルと入力例は、どちらも入力してください。',
       },

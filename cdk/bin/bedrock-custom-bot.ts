@@ -71,10 +71,10 @@ const maxParentTokenSize: number | undefined = knowledgeBase.max_parent_token_si
 const maxChildTokenSize: number | undefined = knowledgeBase.max_child_token_size
   ? Number(knowledgeBase.max_child_token_size.N)
   : undefined;
-const bufferSize: number | undefined = knowledgeBase.buffer_Size
+const bufferSize: number | undefined = knowledgeBase.buffer_size
   ? Number(knowledgeBase.buffer_size.N)
   : undefined;
-const breakpointPercentileThreshold: number | undefined = knowledgeBase.breakpoint_Percentile_Threshold
+const breakpointPercentileThreshold: number | undefined = knowledgeBase.breakpoint_percentile_threshold
   ? Number(knowledgeBase.breakpoint_percentile_threshold.N)
   : undefined;
 const is_guardrail_enabled: boolean | undefined =

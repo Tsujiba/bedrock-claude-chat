@@ -331,6 +331,21 @@ const BotKbEditPage: React.FC = () => {
             bot.bedrockKnowledgeBase!.overlapPercentage ??
               DEFAULT_CHUNKING_OVERLAP_PERCENTAGE
           );
+          setChunkingOverlapTokens(
+            bot.bedrockKnowledgeBase!.overlapTokens ?? DEFAULT_OVERLAP_TOKENS
+          );
+          setChunkingMaxParentTokenSize(
+            bot.bedrockKnowledgeBase!.maxParentTokenSize ?? DEFAULT_MAX_PARENT_TOKEN_SIZE
+          );
+          setChunkingMaxChildTokenSize(
+            bot.bedrockKnowledgeBase!.maxChildTokenSize ?? DEFAULT_MAX_CHILD_TOKEN_SIZE
+          );
+          setBufferSize(
+            bot.bedrockKnowledgeBase!.bufferSize ?? DEFAULT_BUFFER_SIZE
+          );
+          setBreakpointPercentileThreshold(
+            bot.bedrockKnowledgeBase!.breakpointPercentileThreshold ?? DEFAULT_BREAKPOINT_PERCENTILE_THRESHOLD
+          );
           setOpenSearchParams(bot.bedrockKnowledgeBase!.openSearch);
           setSearchParams(bot.bedrockKnowledgeBase!.searchParams);
           setGuardrailArn(bot.bedrockGuardrails.guardrailArn);
@@ -646,6 +661,125 @@ const BotKbEditPage: React.FC = () => {
         );
         return false;
       }
+    } else if(chunkingStrategy === 'hierarchical'){
+      if (chunkingOverlapTokens < EDGE_OVERLAP_TOKENS.MIN) {
+        setErrorMessages(
+          'chunkingOverlapTokens',
+          t('validation.minRange.message', {
+            size: EDGE_OVERLAP_TOKENS.MIN,
+          })
+        );
+        return false;
+      }
+
+      if (chunkingMaxParentTokenSize < EDGE_MAX_PARENT_TOKEN_SIZE.MIN) {
+        setErrorMessages(
+          'chunkingMaxParentTokenSize',
+          t('validation.minRange.message', {
+            size: EDGE_MAX_PARENT_TOKEN_SIZE.MIN,
+          })
+        );
+        return false;
+      } else if (
+        chunkingMaxParentTokenSize > EDGE_MAX_PARENT_TOKEN_SIZE.MAX[embeddingsModel]
+      ) {
+        setErrorMessages(
+          'chunkingMaxParentTokenSize',
+          t('validation.maxRange.message', {
+            size: EDGE_MAX_PARENT_TOKEN_SIZE.MAX[embeddingsModel],
+          })
+        );
+        return false;
+      }
+
+      if (chunkingMaxChildTokenSize < EDGE_MAX_CHILD_TOKEN_SIZE.MIN) {
+        setErrorMessages(
+          'chunkingMaxParentTokenSize',
+          t('validation.minRange.message', {
+            size: EDGE_MAX_CHILD_TOKEN_SIZE.MIN,
+          })
+        );
+        return false;
+      } else if (
+        chunkingMaxChildTokenSize > EDGE_MAX_PARENT_TOKEN_SIZE.MAX[embeddingsModel]
+      ) {
+        setErrorMessages(
+          'chunkingMaxChildTokenSize',
+          t('validation.maxRange.message', {
+            size: EDGE_MAX_CHILD_TOKEN_SIZE.MAX[embeddingsModel],
+          })
+        );
+        return false;
+      }
+
+      if (chunkingMaxParentTokenSize < chunkingMaxChildTokenSize ) {
+        setErrorMessages(
+          'chunkingMaxParentTokenSize',
+          t('validation.parentTokenRange.message')
+        );
+        return false;
+      }
+    } else if(chunkingStrategy === 'semantic'){
+      // TODO
+      if (chunkingMaxTokens < EDGE_CHUNKING_MAX_TOKENS.MIN) {
+        setErrorMessages(
+          'chunkingMaxTokens',
+          t('validation.minRange.message', {
+            size: EDGE_CHUNKING_MAX_TOKENS.MIN,
+          })
+        );
+        return false;
+      } else if (
+        chunkingMaxTokens > EDGE_CHUNKING_MAX_TOKENS.MAX[embeddingsModel]
+      ) {
+        setErrorMessages(
+          'chunkingMaxTokens',
+          t('validation.maxRange.message', {
+            size: EDGE_CHUNKING_MAX_TOKENS.MAX[embeddingsModel],
+          })
+        );
+        return false;
+      }
+
+      if (chunkingBufferSize < EDGE_CHUNKING_BUFFER_SIZE.MIN) {
+        setErrorMessages(
+          'chunkingchunkingBufferSize',
+          t('validation.minRange.message', {
+            size: EDGE_CHUNKING_BUFFER_SIZE.MIN,
+          })
+        );
+        return false;
+      } else if (
+        chunkingBufferSize > EDGE_CHUNKING_BUFFER_SIZE.MAX
+      ) {
+        setErrorMessages(
+          'chunkingBufferSize',
+          t('validation.maxRange.message', {
+            size: EDGE_CHUNKING_BUFFER_SIZE.MAX,
+          })
+        );
+        return false;
+      }
+
+      if (chunkingBreakpointPercentileThreshold < EDGE_BREAKPOINT_PERCENTILE_THRESHOLD.MIN) {
+        setErrorMessages(
+          'chunkingBreakpointPercentileThreshold',
+          t('validation.minRange.message', {
+            size: EDGE_BREAKPOINT_PERCENTILE_THRESHOLD.MIN,
+          })
+        );
+        return false;
+      } else if (
+        chunkingBreakpointPercentileThreshold > EDGE_BREAKPOINT_PERCENTILE_THRESHOLD.MAX
+      ) {
+        setErrorMessages(
+          'chunkingBreakpointPercentileThreshold',
+          t('validation.maxRange.message', {
+            size: EDGE_BREAKPOINT_PERCENTILE_THRESHOLD.MAX,
+          })
+        );
+        return false;
+      }
     }
 
     if (stopSequences.length === 0) {
@@ -708,6 +842,11 @@ const BotKbEditPage: React.FC = () => {
     chunkingStrategy,
     chunkingMaxTokens,
     chunkingOverlapPercentage,
+    chunkingOverlapTokens,
+    chunkingMaxParentTokenSize,
+    chunkingMaxChildTokenSize,
+    chunkingBufferSize,
+    chunkingBreakpointPercentileThreshold,
     t,
   ]);
 
@@ -813,6 +952,11 @@ const BotKbEditPage: React.FC = () => {
     chunkingStrategy,
     chunkingMaxTokens,
     chunkingOverlapPercentage,
+    chunkingOverlapTokens,
+    chunkingMaxParentTokenSize,
+    chunkingMaxChildTokenSize,
+    chunkingBufferSize,
+    chunkingBreakpointPercentileThreshold,
     openSearchParams,
     hateThreshold,
     insultsThreshold,
@@ -931,6 +1075,11 @@ const BotKbEditPage: React.FC = () => {
     chunkingStrategy,
     chunkingMaxTokens,
     chunkingOverlapPercentage,
+    chunkingOverlapTokens,
+    chunkingMaxParentTokenSize,
+    chunkingMaxChildTokenSize,
+    chunkingBufferSize,
+    chunkingBreakpointPercentileThreshold,
     openSearchParams,
     hateThreshold,
     insultsThreshold,
@@ -1323,7 +1472,8 @@ const BotKbEditPage: React.FC = () => {
                           max: EDGE_CHUNKING_MAX_TOKENS.MAX[embeddingsModel],
                           step: EDGE_OVERLAP_TOKENS.STEP,
                         }}
-                        onChange={setChunkingOverlapTokens}
+                        onChange={(overlapTokens) =>
+                          setChunkingOverlapTokens(overlapTokens)}
                         disabled={!isNewBot}
                         errorMessage={errorMessages['chunkingOverlapTokens']}
                       />
@@ -1347,7 +1497,7 @@ const BotKbEditPage: React.FC = () => {
                         }
                         range={{
                           min: EDGE_MAX_PARENT_TOKEN_SIZE.MIN,
-                          max: EDGE_MAX_PARENT_TOKEN_SIZE.MAX,
+                          max: EDGE_MAX_PARENT_TOKEN_SIZE.MAX[embeddingsModel],
                           step: EDGE_MAX_PARENT_TOKEN_SIZE.STEP,
                         }}
                         onChange={(maxParentTokenSize) =>
@@ -1355,7 +1505,7 @@ const BotKbEditPage: React.FC = () => {
                         }
                         disabled={!isNewBot}
                         errorMessage={
-                          errorMessages['maxParentTokenSize']
+                          errorMessages['chunkingMaxParentTokenSize']
                         }
                       />
                     </div>
@@ -1378,7 +1528,7 @@ const BotKbEditPage: React.FC = () => {
                         }
                         range={{
                           min: EDGE_MAX_CHILD_TOKEN_SIZE.MIN,
-                          max: EDGE_MAX_CHILD_TOKEN_SIZE.MAX,
+                          max: EDGE_MAX_CHILD_TOKEN_SIZE.MAX[embeddingsModel],
                           step: EDGE_MAX_CHILD_TOKEN_SIZE.STEP,
                         }}
                         onChange={(maxChildTokenSize) =>
@@ -1386,7 +1536,7 @@ const BotKbEditPage: React.FC = () => {
                         }
                         disabled={!isNewBot}
                         errorMessage={
-                          errorMessages['maxChildTokenSize']
+                          errorMessages['chunkingMaxChildTokenSize']
                         }
                       />
                     </div>
@@ -1444,7 +1594,7 @@ const BotKbEditPage: React.FC = () => {
                         }
                         disabled={!isNewBot}
                         errorMessage={
-                          errorMessages['bufferSize']
+                          errorMessages['chunkingBufferSize']
                         }
                       />
                     </div>

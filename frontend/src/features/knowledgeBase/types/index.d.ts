@@ -16,7 +16,7 @@ export type BedrockKnowledgeBase = {
 
 export type EmbeddingsModel = 'titan_v2' | 'cohere_multilingual_v3';
 
-export type ChunkingStrategy = 'default' | 'fixed_size' | 'hierarchical' |'semantic' | 'none';
+export type ChunkingStrategy = 'default' | 'fixed_size' | 'hierarchical' | 'semantic' | 'none';
 
 export type OpenSearchParams = {
   analyzer: {
