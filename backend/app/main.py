@@ -31,11 +31,12 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.instrumentation.botocore import BotocoreInstrumentor
+from opentelemetry.instrumentation.bedrock import BedrockInstrumentor
 
 # from opentelemetry.sdk.extension.aws.trace import AwsXRayIdGenerator
 
 # X-Ray用のリソースを設定
-resource = Resource.create({"service.name": "backend-api-service"})
+resource = Resource.create({"service.name": "Backend-Api-Service"})
 
 # トレースプロバイダーを設定(v0.34以降のCollectorではIDGeneratorが不要)
 trace.set_tracer_provider(TracerProvider(resource=resource))
@@ -51,6 +52,9 @@ trace.get_tracer_provider().add_span_processor(span_processor)
 
 # Botocoreを計装
 BotocoreInstrumentor().instrument()
+
+# Bedrock呼び出しを計装
+BedrockInstrumentor().instrument()
 
 CORS_ALLOW_ORIGINS = os.environ.get("CORS_ALLOW_ORIGINS", "*")
 PUBLISHED_API_ID = os.environ.get("PUBLISHED_API_ID", None)
