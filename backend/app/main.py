@@ -24,6 +24,33 @@ from pydantic import ValidationError
 from starlette.requests import Request
 from starlette.responses import Response
 from starlette.types import ASGIApp, Message
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.instrumentation.botocore import BotocoreInstrumentor
+
+# from opentelemetry.sdk.extension.aws.trace import AwsXRayIdGenerator
+
+# X-Ray用のリソースを設定
+resource = Resource.create({"service.name": "backend-api-service"})
+
+# トレースプロバイダーを設定(v0.34以降のCollectorではIDGeneratorが不要)
+trace.set_tracer_provider(TracerProvider(resource=resource))
+
+# trace.set_tracer_provider(
+#     TracerProvider(resource=resource, id_generator=AwsXRayIdGenerator())
+# )
+
+# OTLPエクスポーターを設定
+otlp_exporter = OTLPSpanExporter(endpoint="http://localhost:4317")
+span_processor = BatchSpanProcessor(otlp_exporter)
+trace.get_tracer_provider().add_span_processor(span_processor)
+
+# Botocoreを計装
+BotocoreInstrumentor().instrument()
 
 CORS_ALLOW_ORIGINS = os.environ.get("CORS_ALLOW_ORIGINS", "*")
 PUBLISHED_API_ID = os.environ.get("PUBLISHED_API_ID", None)
@@ -51,6 +78,8 @@ app = FastAPI(
     title=title,
 )
 
+# FastAPI計装用ライブラリで計装
+FastAPIInstrumentor.instrument_app(app)
 
 if not is_published_api:
     app.include_router(conversation_router)

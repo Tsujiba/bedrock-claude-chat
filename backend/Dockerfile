@@ -1,5 +1,12 @@
 FROM public.ecr.aws/docker/library/python:3.11.6-slim-bookworm
 
+# layer.zip をコピー（ADOT Layer）
+COPY ./layer.zip ./
+
+RUN apt update -y && apt install -y unzip
+# /opt に解凍する。
+RUN unzip ./layer.zip -d ./opt
+
 # Install lambda web adapter
 COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.7.0 /lambda-adapter /opt/extensions/lambda-adapter
 

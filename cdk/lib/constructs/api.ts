@@ -7,6 +7,7 @@ import {
   DockerImageCode,
   DockerImageFunction,
   IFunction,
+  Tracing
 } from "aws-cdk-lib/aws-lambda";
 import {
   CorsHttpMethod,
@@ -203,8 +204,11 @@ export class Api extends Construct {
         USAGE_ANALYSIS_WORKGROUP: props.usageAnalysis?.workgroupName || "",
         USAGE_ANALYSIS_OUTPUT_LOCATION: usageAnalysisOutputLocation,
         ENABLE_MISTRAL: props.enableMistral.toString(),
+        AWS_LAMBDA_EXEC_WRAPPER: '/opt/otel-instrument',
+        OTEL_PROPAGATORS: 'tracecontext,baggage,xray',
       },
       role: handlerRole,
+      tracing: Tracing.ACTIVE,
     });
 
     const api = new HttpApi(this, "Default", {

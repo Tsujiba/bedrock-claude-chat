@@ -19,6 +19,12 @@ langdetect = "^1.0.9"
 retry = ">=0.9.2,<1"
 types-retry = ">=0.9.9.4,<1"
 duckduckgo-search = "^6.1.4"
+opentelemetry-instrumentation-fastapi = "^0.48b0"
+opentelemetry-sdk = "^1.27.0"
+opentelemetry-exporter-otlp-proto-grpc = "^1.27.0"
+opentelemetry-sdk-extension-aws = "^2.0.2"
+opentelemetry-propagator-aws-xray = "^1.0.2"
+opentelemetry-instrumentation-botocore = "^0.48b0"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.10.0"
