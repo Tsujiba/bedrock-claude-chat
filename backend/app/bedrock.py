@@ -14,8 +14,12 @@ from app.repositories.models.custom_bot_guardrails import BedrockGuardrailsModel
 from app.routes.schemas.conversation import type_model_name
 from app.utils import convert_dict_keys_to_camel_case, get_bedrock_runtime_client
 from typing_extensions import NotRequired, TypedDict, no_type_check
+from opentelemetry import trace
 
 logger = logging.getLogger(__name__)
+
+# Get a tracer from the Global Tracer Provider
+tracer = trace.get_tracer(__name__)
 
 BEDROCK_REGION = os.environ.get("BEDROCK_REGION", "us-east-1")
 ENABLE_MISTRAL = os.environ.get("ENABLE_MISTRAL", "") == "true"
@@ -254,20 +258,24 @@ def compose_args_for_converse_api(
 
 
 def call_converse_api(args: ConverseApiRequest) -> ConverseApiResponse:
-    client = get_bedrock_runtime_client()
+    # manual otel instrument
+    with tracer.start_as_current_span("Bedrock Invoke Span") as span:
+        client = get_bedrock_runtime_client()
 
-    base_args = {
-        "modelId": args["model_id"],
-        "messages": args["messages"],
-        "inferenceConfig": args["inference_config"],
-        "system": args["system"],
-        "additionalModelRequestFields": args["additional_model_request_fields"],
-    }
+        base_args = {
+            "modelId": args["model_id"],
+            "messages": args["messages"],
+            "inferenceConfig": args["inference_config"],
+            "system": args["system"],
+            "additionalModelRequestFields": args["additional_model_request_fields"],
+        }
 
-    if "guardrailConfig" in args:
-        base_args["guardrailConfig"] = args["guardrailConfig"]  # type: ignore
+        if "guardrailConfig" in args:
+            base_args["guardrailConfig"] = args["guardrailConfig"]  # type: ignore
 
-    return client.converse(**base_args)
+        # otel span attribute
+        span.set_attribute("model_id", args["model_id"])
+        return client.converse(**base_args)
 
 
 def calculate_price(

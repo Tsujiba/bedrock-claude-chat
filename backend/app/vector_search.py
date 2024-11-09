@@ -8,6 +8,10 @@ from app.repositories.models.custom_bot import BotModel
 from app.utils import generate_presigned_url, get_bedrock_agent_client
 from botocore.exceptions import ClientError
 from pydantic import BaseModel
+from opentelemetry import trace
+
+# Get a tracer from the Global Tracer Provider
+tracer = trace.get_tracer(__name__)
 
 logger = logging.getLogger(__name__)
 agent_client = get_bedrock_agent_client()
@@ -79,47 +83,53 @@ def get_source_link(source: str) -> tuple[Literal["s3", "url"], str]:
 
 
 def _bedrock_knowledge_base_search(bot: BotModel, query: str) -> list[SearchResult]:
-    assert bot.bedrock_knowledge_base is not None
-    if bot.bedrock_knowledge_base.search_params.search_type == "semantic":
-        search_type = "SEMANTIC"
-    elif bot.bedrock_knowledge_base.search_params.search_type == "hybrid":
-        search_type = "HYBRID"
-    else:
-        raise ValueError("Invalid search type")
+    # manual otel instrument
+    with tracer.start_as_current_span("Knowledge base Retrieve Span") as span:
+        assert bot.bedrock_knowledge_base is not None
+        if bot.bedrock_knowledge_base.search_params.search_type == "semantic":
+            search_type = "SEMANTIC"
+        elif bot.bedrock_knowledge_base.search_params.search_type == "hybrid":
+            search_type = "HYBRID"
+        else:
+            raise ValueError("Invalid search type")
 
-    limit = bot.bedrock_knowledge_base.search_params.max_results
-    knowledge_base_id = bot.bedrock_knowledge_base.knowledge_base_id
+        limit = bot.bedrock_knowledge_base.search_params.max_results
+        knowledge_base_id = bot.bedrock_knowledge_base.knowledge_base_id
 
-    try:
-        response = agent_client.retrieve(
-            knowledgeBaseId=knowledge_base_id,
-            retrievalQuery={"text": query},
-            retrievalConfiguration={
-                "vectorSearchConfiguration": {
-                    "numberOfResults": limit,
-                    "overrideSearchType": search_type,
-                }
-            },
-        )
-
-        search_results = []
-        for i, retrieval_result in enumerate(response.get("retrievalResults", [])):
-            content = retrieval_result.get("content", {}).get("text", "")
-            source = (
-                retrieval_result.get("location", {})
-                .get("s3Location", {})
-                .get("uri", "")
+        try:
+            response = agent_client.retrieve(
+                knowledgeBaseId=knowledge_base_id,
+                retrievalQuery={"text": query},
+                retrievalConfiguration={
+                    "vectorSearchConfiguration": {
+                        "numberOfResults": limit,
+                        "overrideSearchType": search_type,
+                    }
+                },
             )
 
-            search_results.append(
-                SearchResult(rank=i, bot_id=bot.id, content=content, source=source)
-            )
+            search_results = []
+            for i, retrieval_result in enumerate(response.get("retrievalResults", [])):
+                content = retrieval_result.get("content", {}).get("text", "")
+                source = (
+                    retrieval_result.get("location", {})
+                    .get("s3Location", {})
+                    .get("uri", "")
+                )
 
-        return search_results
+                search_results.append(
+                    SearchResult(rank=i, bot_id=bot.id, content=content, source=source)
+                )
+            # otel span attribute
+            span.set_attribute("search_type", search_type)
+            span.set_attribute("knowledge_base_id", knowledge_base_id)
+            span.set_attribute("search_result_num", len(search_results))
 
-    except ClientError as e:
-        logger.error(f"Error querying Bedrock Knowledge Base: {e}")
-        raise e
+            return search_results
+
+        except ClientError as e:
+            logger.error(f"Error querying Bedrock Knowledge Base: {e}")
+            raise e
 
 
 def search_related_docs(bot: BotModel, query: str) -> list[SearchResult]:
