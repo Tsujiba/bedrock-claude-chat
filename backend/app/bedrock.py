@@ -275,6 +275,9 @@ def call_converse_api(args: ConverseApiRequest) -> ConverseApiResponse:
 
         # otel span attribute
         span.set_attribute("model_id", args["model_id"])
+
+        # sample logging for trace context map
+        logger.info("bedrock invoke!")
         return client.converse(**base_args)
 
 

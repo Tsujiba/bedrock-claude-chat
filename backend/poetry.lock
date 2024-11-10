@@ -993,6 +993,21 @@ opentelemetry-util-http = "0.48b0"
 instruments = ["fastapi (>=0.58,<1.0)"]
 
 [[package]]
+name = "opentelemetry-instrumentation-logging"
+version = "0.48b0"
+description = "OpenTelemetry Logging instrumentation"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "opentelemetry_instrumentation_logging-0.48b0-py3-none-any.whl", hash = "sha256:75e5357d9b8c12071a19e1fef664dc1f430ef45874445c324ba4439a00972dc0"},
+    {file = "opentelemetry_instrumentation_logging-0.48b0.tar.gz", hash = "sha256:529eb13eedf57d6b2f94e20e996271db2957b817b9457fe4796365d6d4238dec"},
+]
+
+[package.dependencies]
+opentelemetry-api = ">=1.12,<2.0"
+opentelemetry-instrumentation = "0.48b0"
+
+[[package]]
 name = "opentelemetry-propagator-aws-xray"
 version = "1.0.2"
 description = "AWS X-Ray Propagator for OpenTelemetry"
@@ -1906,4 +1921,4 @@ type = ["pytest-mypy"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.13"
-content-hash = "d212edc2b6c04f6ff8dac6c78f46940d643df6ccb74685a577ce37e2defb25e1"
+content-hash = "508941bdea89889f963f8244d09fcd354a8df8ca6b2a9f9bc4417e64dec1419e"

@@ -32,18 +32,27 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExport
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.instrumentation.botocore import BotocoreInstrumentor
 from opentelemetry.instrumentation.bedrock import BedrockInstrumentor
+from opentelemetry.instrumentation.logging import LoggingInstrumentor
 
-# from opentelemetry.sdk.extension.aws.trace import AwsXRayIdGenerator
+from opentelemetry.sdk.extension.aws.trace import AwsXRayIdGenerator
+from opentelemetry.propagate import set_global_textmap
+from opentelemetry.propagators.aws import AwsXRayPropagator
+
+# Setup AWS X-Ray propagator
+set_global_textmap(AwsXRayPropagator())
 
 # X-Ray用のリソースを設定
 resource = Resource.create({"service.name": "Backend-Api-Service"})
 
-# トレースプロバイダーを設定(v0.34以降のCollectorではIDGeneratorが不要)
-trace.set_tracer_provider(TracerProvider(resource=resource))
 
-# trace.set_tracer_provider(
-#     TracerProvider(resource=resource, id_generator=AwsXRayIdGenerator())
-# )
+# Setup AWS X-Ray propagator
+set_global_textmap(AwsXRayPropagator())
+
+# トレースプロバイダーを設定(v0.34以降のCollectorではIDGeneratorが不要)
+# trace.set_tracer_provider(TracerProvider(resource=resource))
+trace.set_tracer_provider(
+    TracerProvider(resource=resource, id_generator=AwsXRayIdGenerator())
+)
 
 # OTLPエクスポーターを設定
 otlp_exporter = OTLPSpanExporter(endpoint="http://localhost:4317")
@@ -61,8 +70,13 @@ PUBLISHED_API_ID = os.environ.get("PUBLISHED_API_ID", None)
 
 is_published_api = PUBLISHED_API_ID is not None
 
+# Logging Instrument
+# Ref:https://opentelemetry-python-contrib.readthedocs.io/en/latest/instrumentation/logging/logging.html
+LoggingInstrumentor().instrument(set_logging_format=True)
+
 logging.basicConfig(level=logging.INFO, format="%(levelname)s:%(name)s - %(message)s")
 logger = logging.getLogger(__name__)
+
 
 if not is_published_api:
     openapi_tags = [
